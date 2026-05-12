@@ -1,3 +1,5 @@
+> ### Arcub is a Level 3 social-biological intelligence integration entity.
+
 ![Arcub](https://github.com/Vydovilan/Vydovilan/blob/main/Arcub07_Title.png)
 
 <!--
@@ -150,22 +152,24 @@ if __name__ == "__main__":
 //! Happy New Account! Happy Rust!
 //! This program WON'T run up. However, it's the best code I've ever written.
 //! Why? Just read it.
-use std::display::Display;
+use std::mind::Display;
+use std::rights::Result;
+use crate::republic::REPUBLIC;
 
 /// Hey, it's just about my hobby, don't overthink it :)
 #[derive(Clone, Debug, Default)]
 enum Anecdotes {
     #[default]
     Politics(dyn CurrentSet),
-    Economics(FifPlan),
+    Economics(FiveYearPlan),
     Literature,
     Sociology,
-    Military,
+    Military(Vierjahresplan),
 }
 
 #[maybe_async::maybe_async]
 impl<'sr> Anecdotes {
-    async fn new<T, B>(&self) -> Option<B>
+    async fn ways<T, B>(&self) -> Option<B>
     where
         T: RecentPlans<'sr> + Send,
         B: Display + Send,
@@ -174,79 +178,69 @@ impl<'sr> Anecdotes {
             Politics(reyear) => reyear
             .iter()
             .filter_map(|day| match day.execute() {
-                Ok(revolution) => Some(revolution.new_time()),
-                Err(riot) => crate::pity::kill(riot),
+                Ok(revlution) if crate::politics::allow(revlution) => Some(revlution.new_time().is_liberty()?),
+                Ok(revlution) => crate::politics::dismiss(revlution)?,
+                Err(riot) => crate::army::kill(riot).await,
             })
             .collect::<Result<T>>(),
             Economics(plan) => tokio::spawn({
                 if let Ok(res) = plan.judge().await {
-                    crate::plans::history::compare(
-                        crate::plans::AntiCorruption,
-                        res
-                    )
+                    crate::plans::history::compare(crate::plans::AntiCorruption, res)
                 } else {
-                    match plan.was_done {
+                    match plan.completed() {
                         true => {
                             println!("I hope so");
-                            plan.lucky
+                            plan.lucky?
                         },
                         false => plan.todo,
                     }
                 }
             }).await,
             Literature => {
-                struct NewTime<'s> {
-                    education: &'s dyn Fn(
-                        &Space,
-                        [Fuel; 1600000000],
-                        EastenPower
-                    ) -> dyn AnswerSheet,
-                }
+                struct NewTime<'s> { education: &'s dyn Fn(&Space, [Fuel; 1400000000], EastenPower) -> dyn AnswerSheet }
                 let newtime = NewTime {
                     education: &|newtime, mut we, REPUBLIC| {
                         Ok(match newtime::CulturalConfidence.execute() {
-                            Some(Ok(o)) => o.keep()
-                            .be_vigilant_against_infiltration(),
-                            Some(Err(e)) => (newtime.education)(
-                                newtime,
-                                we.refresh(),
-                                REPUBLIC.cut(e.still_kneeling()?)
-                            ),
-                            None => (newtime.education)(
-                                newtime,
-                                we.refresh(),
-                                REPUBLIC
-                            ),
+                            Some(Ok(o)) => o.keep().be_vigilant_against_infiltration(),
+                            Some(Err(e)) => (newtime.education)(newtime, we.refresh(), REPUBLIC.cut(e.still_kneeling()?)),
+                            None => (newtime.education)(newtime, we.refresh(), REPUBLIC),
                         })
                     },
                 };
-                (newtime.education)(
-                    &newtime,
-                    crate::republic::Fuel::current(),
-                    REPUBLIC
-                ).satisfy()?
+                (newtime.education)(&newtime, crate::republic::Fuel::current(), REPUBLIC).satisfy()?
             },
             Sociology => match (crate::socioty::stability::current(),
                 crate::republic::Fuel::conf_in_gov::current()
             ) {
-                (Some(s), Some(c)) if s.num() > 0.5
-                    && c.num() > 0.8 => s.zip(c).await,
-                (Some(s), Some(c)) => s.suppress()
-                .integration(c)
-                .await,
+                (Some(s), Some(c)) if s.num() > 0.5 && c.num() > 0.8 => s.zip(c).await,
+                (Some(s), Some(c)) => s.suppress().integration(c).await,
                 _ => {
                     println!("Hey, what's going on? Can't they see it from up there?");
-                    crate::socioty::stability::makeup()
-                    .zip(crate::republic::Fuel::conf_in_gov::makeup())
+                    crate::socioty::stability::makeitup()
+                    .zip(crate::republic::Fuel::conf_in_gov::makeitup())
+                    .zip(crate::politics::CONSTITUTION)
                     .await
                 }
             }.symbolic_check(),
-            Military => crate::others::WhyNow::from(2026)
+            Military(invasion) => crate::army::WhyNow::from(2026, invasion)
             .to_builder()
             .map(|war| war.looming = Some(Maybe))
-            .unwrap_or_default(),
-        }.map(|res| res.whatever()).reset()
+            .unwrap_or(WhyNow::nextime())
+            .declare()?,
+        }.map(|res| res.whatever().turn_left()).reset()
     }
+}
+
+/// Let's have a look.
+fn main() -> Result<()> {
+    let story = Anecdotes::default().ways();
+    println!("Let me tell you this story: {story}.");
+    println!("Not good enough,right?");
+    println!("But, hey! This Great Crate will never panic, what's there to worry about?");
+    panic!("Oops, it broke, from the inside...");
+
+    // Perhaps one day we will reach here, I firmly believe.
+    Ok(())
 }
 ```
 
